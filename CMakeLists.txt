@@ -1,11 +1,56 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(chimera VERSION 0.1.0 LANGUAGES C CXX)
+# -----------------------------------------------------------------------------
+# Early Initialization
+cmake_minimum_required(VERSION 3.24)
 
-include(CTest)
-enable_testing()
+# Avoid having an empty `CMAKE_BUILD_TYPE`.
+# CMAKE_BUILD_TYPE= Release | Debug | etc...
+if(NOT DEFINED CMAKE_BUILD_TYPE_INIT)
+  set(CMAKE_BUILD_TYPE_INIT "Release")
+  # Internal logic caches this variable, avoid showing it by default
+  # since it's easy to accidentally set instead of the build type.
+  mark_as_advanced(CMAKE_BUILD_TYPE_INIT)
+endif()
 
-add_executable(chimera main.cpp)
+# Disbale CMAKE DEPRECATION WARNING
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE) 
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+# -----------------------------------------------------------------------------
+# Load Chimera's Local cmake util functions
+include(build_util/cmake/macros.cmake)
+
+# -----------------------------------------------------------------------------
+# Initialize Project
+set( NAME chimera )                         # Executable name
+set( CMAKE_CXX_STANDARD 17 )                # Cpp compiler version
+set( CMAKE_CXX_STANDARD_REQUIRED True )
+
+project( ${NAME} VERSION 0.1.0 LANGUAGES C CXX )
+
+# -------------------------------------------------------------------------------
+# Global Defines
+add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}") # 임시 방편입니다!
+add_definitions(-DCM_DEBUG) # 임시 방편입니다!
+
+# Print compile flags for cmake debug purpose. maybe removed later.
+# cm_printf(NOTE "Using CFLAGS: ${CMAKE_C_FLAGS}")
+# cm_printf(NOTE "Using CXXFLAGS: ${CMAKE_CXX_FLAGS}")
+
+# -----------------------------------------------------------------------------
+# Add Sub-Directories
+add_subdirectory(intern)
+# add_subdirectory(extern)
+
+add_subdirectory(source)
+
+# ----------------------------------------------------------------------------
+# Add Custom makefile rule (ex make fclean, re)
+ADD_CUSTOM_TARGET( re
+        COMMENT "Re-building..."
+        COMMAND make fclean && make all
+        # ...
+        )
+
+ADD_CUSTOM_TARGET( fclean
+        COMMENT "Cleaning executable and binaries..."
+        COMMAND make clean
+        )
