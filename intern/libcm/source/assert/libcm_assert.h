@@ -2,8 +2,8 @@
 // Created by Minkyeu Kim on 12/13/23.
 //
 
-#ifndef INTERN_ASSERT_H
-#define INTERN_ASSERT_H
+#ifndef INTERN_LIBCM_ASSERT_H
+#define INTERN_LIBCM_ASSERT_H
 
 #include <cstdlib>
 #include <cstdio>
@@ -41,12 +41,6 @@
 # define CM_ASSERT_DEV(developer, expr, formatString)     __CM_ASSERT_IMPLEMENT(developer, expr, formatString, 1)
 # define CM_ASSERT_MUST(developer, expr, formatString)    __CM_ASSERT_IMPLEMENT(developer, expr, formatString, 1)
 
- // Cmake에서 dev 모드로 빌드시, CM_DEV를 define합니다.
-#elif defined(CM_DEV)
-# define CM_ASSERT_NOTE(developer, expr, formatString)    ((void)0)
-# define CM_ASSERT_DEV(developer, expr, formatString)     __CM_ASSERT_IMPLEMENT(developer, expr, formatString, 1)
-# define CM_ASSERT_MUST(developer, expr, formatString)    __CM_ASSERT_IMPLEMENT(developer, expr, formatString, 1)
-
  // Cmake에서 release 모드로 빌드시, CM_RELEASE를 define합니다.
 #elif defined(CM_RELEASE)
 # define CM_ASSERT_NOTE(developer, expr, formatString)    ((void)0)
@@ -59,4 +53,4 @@
 #define NDEBUG
 #endif
 
-#endif // assert.h
+#endif // INTERN_LIBCM_ASSERT_H

@@ -1,6 +1,6 @@
-// #include <iostream>
-#include <cassert.h>
-#include "UTIL_assert.h"
+#include <iostream>
+
+#include "libcm.h"
 
 int main()
 {

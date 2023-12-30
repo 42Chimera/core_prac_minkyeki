@@ -47,12 +47,40 @@ function(cm_printf)
     elseif(MessageType STREQUAL WARN) # 경고성 메시지
         list(REMOVE_AT ARGV 0)
         message("${BoldYellow}${ARGV}${ColourReset}")
-    elseif(MessageType STREQUAL NOTE) # 단순 정보 출력용 메시지
+    elseif(MessageType STREQUAL STATUS) # 단순 정보 출력용 메시지
         list(REMOVE_AT ARGV 0)
         message("${Green}${ARGV}${ColourReset}")
     else()
         message("${ARGV}")
     endif()
+endfunction()
+
+
+
+# --------------------------------------------------------------------
+# Nicer makefiles with -I/1/foo/ instead of -I/1/2/3/../../foo/
+# use it instead of include_directories()
+function(absolute_include_dirs
+  includes_absolute)
+
+  set(_ALL_INCS "")
+  foreach(_INC ${ARGN})
+    # Pass any scoping keywords as is
+    if(("${_INC}" STREQUAL "PUBLIC") OR
+       ("${_INC}" STREQUAL "PRIVATE") OR
+       ("${_INC}" STREQUAL "INTERFACE"))
+      list(APPEND _ALL_INCS ${_INC})
+    else()
+      get_filename_component(_ABS_INC ${_INC} ABSOLUTE)
+      list(APPEND _ALL_INCS ${_ABS_INC})
+      # for checking for invalid includes, disable for regular use
+      # if(NOT EXISTS "${_ABS_INC}/")
+      #   message(FATAL_ERROR "Include not found: ${_ABS_INC}/")
+      # endif()
+    endif()
+  endforeach()
+
+  set(${includes_absolute} ${_ALL_INCS} PARENT_SCOPE)
 endfunction()
 
 
@@ -117,11 +145,13 @@ function(blender_add_lib__impl
 
     # works fine without having the includes
     # listed is helpful for IDE's (QtCreator/MSVC)
-    blender_source_group("${name}" "${sources}")
-    blender_user_header_search_paths("${name}" "${includes}")
 
-    list_assert_duplicates("${sources}")
-    list_assert_duplicates("${includes}")
+    # blender_source_group("${name}" "${sources}")
+    # blender_user_header_search_paths("${name}" "${includes}")
+
+    # list_assert_duplicates("${sources}")
+    # list_assert_duplicates("${includes}")
+    
     # Not for system includes because they can resolve to the same path
     # list_assert_duplicates("${includes_sys}")
 endfunction()

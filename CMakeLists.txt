@@ -21,7 +21,7 @@ include(build_util/cmake/macros.cmake)
 # -----------------------------------------------------------------------------
 # Initialize Project
 set( NAME chimera )                         # Executable name
-set( CMAKE_CXX_STANDARD 17 )                # Cpp compiler version
+set( CMAKE_CXX_STANDARD 20 )                # Cpp compiler version
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 
 project( ${NAME} VERSION 0.1.0 LANGUAGES C CXX )
@@ -37,8 +37,9 @@ add_definitions(-DCM_DEBUG) # 임시 방편입니다!
 
 # -----------------------------------------------------------------------------
 # Add Sub-Directories
+cm_printf(STATUS " Current CmakeLists.txt location : ${CMAKE_CURRENT_LIST_DIR} ")
 add_subdirectory(intern)
-# add_subdirectory(extern)
+# add_subdirectory(extern) # --> extern은 좀 다르게 처리해야 함!
 
 add_subdirectory(source)
 
