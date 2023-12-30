@@ -4,6 +4,7 @@ set(INC
   ${CMAKE_SOURCE_DIR}/intern/libcm
 )
 
+# FIND LIBRARY를 이용해서 .so 위치 알아내기...
 set(LIB
   cm::intern::libcm
 )
