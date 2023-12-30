@@ -1,7 +1,6 @@
 #
 # Created by Minkyeu Kim on 12/13/23.
-# 
-
+#
 
 # Reference : Blender cmake macro functions
 # --------------------------------------------------------------------
@@ -94,13 +93,12 @@ function(blender_target_include_dirs_sys
     absolute_include_dirs(_ALL_INCS ${ARGN})
     blender_target_include_dirs_impl(${target} TRUE "${_ALL_INCS}")
 endfunction()
-# Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
 
 # -----------------------------------------------------------------------------
 # Add Library Macro : cm_add_lib(...)
 
 # only MSVC uses SOURCE_GROUP
-function(cm_add_lib__impl
+function(blender_add_lib__impl
         name
         sources
         includes
