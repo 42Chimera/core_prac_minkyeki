@@ -2,11 +2,23 @@
 # Created by Minkyeu Kim on 12/13/23.
 # 
 
-# Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
 
 # Reference : Blender cmake macro functions
 # --------------------------------------------------------------------
 # https://github.com/blender/blender/blob/9c0bffcc89f174f160805de042b00ae7c201c40b/build_files/cmake/macros.cmake#L415
+# Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
+
+
+# Cmake Colorized message function
+# --------------------------------------------------------------------
+# https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake
+
+# Add Library Macro : cm_printf(...)
+
+# How to Use
+# cm_printf(FATAL "foo") --> 에러 메시지, 빨간색
+# cm_printf(WARN "bar") --> 경고성 메시지, 마젠타
+# cm_printf(NOTE "baz") --> 단순 로그 메시지, 초록색
 
 if(NOT WIN32)
     string(ASCII 27 Esc)
@@ -28,16 +40,6 @@ if(NOT WIN32)
     set(BoldWhite   "${Esc}[1;37m")
 endif()
 
-
-# Cmake Colorized message function
-# --------------------------------------------------------------------
-# https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake
-
-# How to Use
-    # cm_printf(FATAL "...") --> 에러 메시지
-    # cm_printf(WARN "...") --> 경고성 메시지
-    # cm_printf(NOTE "...") --> 단순 로그 메시지
-
 function(cm_printf)
     list(GET ARGV 0 MessageType)
     if(MessageType STREQUAL FATAL) # 심각한 CMAKE 에러
@@ -52,4 +54,88 @@ function(cm_printf)
     else()
         message("${ARGV}")
     endif()
+endfunction()
+
+
+function(blender_target_include_dirs_impl
+        target
+        system
+        includes
+)
+    set(next_interface_mode "PRIVATE")
+    foreach(_INC ${includes})
+        if(("${_INC}" STREQUAL "PUBLIC") OR
+        ("${_INC}" STREQUAL "PRIVATE") OR
+        ("${_INC}" STREQUAL "INTERFACE"))
+            set(next_interface_mode "${_INC}")
+        else()
+            if(system)
+                target_include_directories(${target} SYSTEM ${next_interface_mode} ${_INC})
+            else()
+                target_include_directories(${target} ${next_interface_mode} ${_INC})
+            endif()
+            set(next_interface_mode "PRIVATE")
+        endif()
+    endforeach()
+endfunction()
+
+# Nicer makefiles with -I/1/foo/ instead of -I/1/2/3/../../foo/
+# use it instead of target_include_directories()
+function(blender_target_include_dirs
+        target
+)
+    absolute_include_dirs(_ALL_INCS ${ARGN})
+    blender_target_include_dirs_impl(${target} FALSE "${_ALL_INCS}")
+endfunction()
+
+function(blender_target_include_dirs_sys
+        target
+)
+    absolute_include_dirs(_ALL_INCS ${ARGN})
+    blender_target_include_dirs_impl(${target} TRUE "${_ALL_INCS}")
+endfunction()
+# Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
+
+# -----------------------------------------------------------------------------
+# Add Library Macro : cm_add_lib(...)
+
+# only MSVC uses SOURCE_GROUP
+function(cm_add_lib__impl
+        name
+        sources
+        includes
+        includes_sys
+        library_deps
+)
+    # message(STATUS "Configuring library ${name}")
+    add_library(${name} ${sources})
+
+    blender_target_include_dirs(${name} ${includes})
+    blender_target_include_dirs_sys(${name} ${includes_sys})
+
+    if(library_deps)
+        blender_link_libraries(${name} "${library_deps}")
+    endif()
+
+    # works fine without having the includes
+    # listed is helpful for IDE's (QtCreator/MSVC)
+    blender_source_group("${name}" "${sources}")
+    blender_user_header_search_paths("${name}" "${includes}")
+
+    list_assert_duplicates("${sources}")
+    list_assert_duplicates("${includes}")
+    # Not for system includes because they can resolve to the same path
+    # list_assert_duplicates("${includes_sys}")
+endfunction()
+
+function(cm_add_lib
+        name
+        sources
+        includes
+        includes_sys
+        library_deps
+)
+    blender_add_lib__impl(${name} "${sources}" "${includes}" "${includes_sys}" "${library_deps}")
+    # https://cmake.org/cmake/help/latest/command/set_property.html
+    set_property(GLOBAL APPEND PROPERTY CM_LINK_LIBS=${name})
 endfunction()
