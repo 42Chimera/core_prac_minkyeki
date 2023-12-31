@@ -47,7 +47,7 @@
 #ifdef _Check_return_void_
 #   undef _Check_return_void_
 #endif
-#define _Check_return_void_
+#define _Check_return_void_ 
 
 // ------------------------------------
 #ifdef _Deprecated_

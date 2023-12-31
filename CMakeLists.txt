@@ -2,46 +2,83 @@
 # Early Initialization
 cmake_minimum_required(VERSION 3.24)
 
-# Avoid having an empty `CMAKE_BUILD_TYPE`.
-# CMAKE_BUILD_TYPE= Release | Debug | etc...
-if(NOT DEFINED CMAKE_BUILD_TYPE_INIT)
-  set(CMAKE_BUILD_TYPE_INIT "Release")
-  # Internal logic caches this variable, avoid showing it by default
-  # since it's easy to accidentally set instead of the build type.
-  mark_as_advanced(CMAKE_BUILD_TYPE_INIT)
-endif()
-
-# Disbale CMAKE DEPRECATION WARNING
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE) 
-
 # -----------------------------------------------------------------------------
 # Load Chimera's Local cmake util functions
 include(build_util/cmake/macros.cmake)
+
+# -----------------------------------------------------------------------------
+# Avoid having an empty `CMAKE_BUILD_TYPE`.
+# 빌드 타입 명시가 없으면 기본 debug로 설정.
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+  cm_printf(WARN "===== CMAKE_BUILD_TYPE : Unspecified =====")
+  cm_printf(WARN "Setting CMAKE_BUILD_TYPE to Debug by default...")
+  cm_printf(WARN "for release build, add '-DCMAKE_BUILD_TYPE=Release' ARGS to Cmake...")
+  set(CMAKE_BUILD_TYPE Debug) # Default build type.
+else()
+  cm_printf(STATUS "===== CMAKE_BUILD_TYPE : ${CMAKE_BUILD_TYPE} =====")
+endif()
+
+# -----------------------------------------------------------------------------
+# Disbale CMAKE DEPRECATION WARNING
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE) 
+
+# Generate a compile_commands.json in your build directory 
+# that lists every file and it's compile command.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_L)
+cm_printf(STATUS "List of every file and it's compile command is saved to 'build/compile_commands.json'")
+
+
 
 # -----------------------------------------------------------------------------
 # Initialize Project
 set( NAME chimera )                         # Executable name
 set( CMAKE_CXX_STANDARD 20 )                # Cpp compiler version
 set( CMAKE_CXX_STANDARD_REQUIRED True )
-
 project( ${NAME} VERSION 0.1.0 LANGUAGES C CXX )
 
-# -------------------------------------------------------------------------------
-# Global Defines
-add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}") # 임시 방편입니다!
-add_definitions(-DCM_DEBUG) # 임시 방편입니다!
 
-# Print compile flags for cmake debug purpose. maybe removed later.
-# cm_printf(NOTE "Using CFLAGS: ${CMAKE_C_FLAGS}")
-# cm_printf(NOTE "Using CXXFLAGS: ${CMAKE_CXX_FLAGS}")
+# -----------------------------------------------------------------------------
+# Compiler warning level setting
+# https://stackoverflow.com/questions/2368811/how-to-set-warning-level-in-cmake
+cm_printf(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+if (MSVC)
+    if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]") # Force to always compile with W4
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) # Update if necessary
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wextra -Wall -Wno-long-long")
+endif()
+
+# -------------------------------------------------------------------------------
+# Add Global Defines to project
+add_compile_definitions(
+  # add project absolute path.
+  CM_PROJECT_ABSOLUTE_PATH="${CMAKE_SOURCE_DIR}" # --> 파일 경로 관련해서 활용 예정
+  # if CMAKE_BUILD_TYPE is Debug, define CM_DEBUG. else, define CM_RELEASE 
+  $<IF:$<CONFIG:Debug>,CM_DEBUG,CM_RELEASE> # --> libcm_assert.h에서 활용 예정
+)
 
 # -----------------------------------------------------------------------------
 # Add Sub-Directories
-cm_printf(STATUS " Current CmakeLists.txt location : ${CMAKE_CURRENT_LIST_DIR} ")
+
+# Print current cmake list location (for debug purpose)
+cm_printf_cmake_list_location()
 add_subdirectory(intern)
 # add_subdirectory(extern) # --> extern은 좀 다르게 처리해야 함!
-
 add_subdirectory(source)
+
+# ----------------------------------------------------------------------------
+# Set CMAKE output directory
+cm_printf(STATUS "Executable output path : ${CMAKE_BINARY_DIR}")
+set_target_properties( ${NAME} 
+  PROPERTIES
+  # ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+  # LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
 
 # ----------------------------------------------------------------------------
 # Add Custom makefile rule (ex make fclean, re)

@@ -71,9 +71,9 @@
 # define CM_ASSERT_MUST(developer, expr, formatString)    __CM_ASSERT_IMPLEMENT(developer, expr, formatString, 1)
 #endif
 
-// disable assert() function from <cassert>
-#ifdef CM_RELEASE
-#define NDEBUG
-#endif
+// CMAKE에서 릴리즈 모드는 자동으로 해주나보다..
+// #ifdef CM_RELEASE
+// #define NDEBUG
+// #endif
 
 #endif // INTERN_LIBCM_ASSERT_H

@@ -9,6 +9,11 @@
 
 // LIB WITH SOURCE
 // -------------------------
-extern void test_add();
+namespace CM
+{
+
+void test_speak() noexcept;
+
+}
 
 #endif //INTERN_LIBCM_H
