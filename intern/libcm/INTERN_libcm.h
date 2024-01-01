@@ -12,7 +12,7 @@
 namespace CM
 {
 
-void test_speak() noexcept;
+_Check_return_void_ void test_speak() noexcept;
 
 }
 

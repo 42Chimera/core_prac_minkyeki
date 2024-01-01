@@ -9,12 +9,16 @@ cm_printf_cmake_list_location()
 #   REQUIRED)
 # cm_printf(FATAL "TEST : ${TEST}")
 
+# Source to compile
+set(SRC
+  main.cpp
+)
+
+
 # Directories for header include
 set(INC
   ${CMAKE_SOURCE_DIR}/intern/libcm
-  # ${CMAKE_BINARY_DIR}/intern/libcm
 )
-
 
 # ?
 set(INC_SYS
@@ -23,11 +27,6 @@ set(INC_SYS
 # Libraries to link
 set(LIB
   cm_intern_libcm
-)
-
-# Source to compile
-set(SRC
-  main.cpp
 )
 
 # Set source to target

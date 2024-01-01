@@ -25,7 +25,6 @@ set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 # Generate a compile_commands.json in your build directory 
 # that lists every file and it's compile command.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_EXPORT_L)
 cm_printf(STATUS "List of every file and it's compile command is saved to 'build/compile_commands.json'")
 
 
@@ -40,7 +39,7 @@ project( ${NAME} VERSION 0.1.0 LANGUAGES C CXX )
 
 # -----------------------------------------------------------------------------
 # Compiler warning level setting
-# https://stackoverflow.com/questions/2368811/how-to-set-warning-level-in-cmake
+#   - https://stackoverflow.com/questions/2368811/how-to-set-warning-level-in-cmake
 cm_printf(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 if (MSVC)
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]") # Force to always compile with W4
@@ -54,11 +53,10 @@ endif()
 
 # -------------------------------------------------------------------------------
 # Add Global Defines to project
+# if CMAKE_BUILD_TYPE is Debug, define CM_DEBUG. else, define CM_RELEASE 
 add_compile_definitions(
-  # add project absolute path.
-  CM_PROJECT_ABSOLUTE_PATH="${CMAKE_SOURCE_DIR}" # --> 파일 경로 관련해서 활용 예정
-  # if CMAKE_BUILD_TYPE is Debug, define CM_DEBUG. else, define CM_RELEASE 
-  $<IF:$<CONFIG:Debug>,CM_DEBUG,CM_RELEASE> # --> libcm_assert.h에서 활용 예정
+  CM_PROJECT_ABSOLUTE_PATH="${CMAKE_SOURCE_DIR}" # Project absolute path
+  $<IF:$<CONFIG:Debug>,CM_DEBUG,CM_RELEASE> # Set build-type define variable
 )
 
 # -----------------------------------------------------------------------------

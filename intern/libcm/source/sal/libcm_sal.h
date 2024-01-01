@@ -16,11 +16,11 @@
 */
 
 #if defined(__clang__)
-    #define MK_COMPILER_CLANG
+    #define CM_COMPILER_CLANG
 #elif defined(__GNUC__) || defined(__GNUG__)
-    #define MK_COMPILER_GCC
+    #define CM_COMPILER_GCC
 #elif defined(_MSC_VER)
-    #define MK_COMPILER_MSVC
+    #define CM_COMPILER_MSVC
 #elif defined(__MINGW32__) || defined(__MINGW64__)
 	// ...
 #endif
@@ -33,7 +33,7 @@
 // https://learn.microsoft.com/en-us/archive/blogs/michael_howard/a-brief-introduction-to-the-standard-annotation-language-sal
 // https://learn.microsoft.com/en-us/cpp/code-quality/understanding-sal?view=msvc-170
 
-#if (defined(MK_COMPILER_MSVC)) || \
+#if (defined(CM_COMPILER_MSVC)) || \
     (defined(__has_include) && __has_include(<sal.h>))
     #include <sal.h>
 #else

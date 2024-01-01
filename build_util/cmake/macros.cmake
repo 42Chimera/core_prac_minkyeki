@@ -60,9 +60,7 @@ endfunction()
 function(list_assert_duplicates
   list_id
   )
-
   # message(STATUS "list data: ${list_id}")
-
   list(REMOVE_ITEM list_id "PUBLIC" "PRIVATE" "INTERFACE")
   list(LENGTH list_id _len_before)
   list(REMOVE_DUPLICATES list_id)
@@ -97,20 +95,14 @@ function(cm_add_library__impl
   library_deps
   )
 
-  # message(STATUS "Configuring library ${name}")
-  # SHARED, STATIC, MODULE 명시는 하지 않았으나,
-  # SHARED로 처리할 수 있는 방법을 찾아서 적용할 예정
+  # SHARED, STATIC, MODULE 명시는 하지 않았으나... SHARED로 처리할 수 있는 방법을 찾아서 적용할 예정
   add_library(${name} ${sources})
-
-  # 엥 PUBLIC으로 안하면 test_test.cpp 에서 include_directories가 적용이 안되네.
-
   # add include path to project
-  target_include_directories(${name} PUBLIC ${include}) 
+  target_include_directories(${name} PUBLIC ${includes}) 
   # add library source
   target_sources(${name} PUBLIC ${sources})
   # remove default library output file's prefix ( default prefix = "lib" )
   set_target_properties(${name} PROPERTIES PREFIX "")
-
   # link dependecy libraries
   if(library_deps)
    target_link_libraries(${name} ${library_deps})
