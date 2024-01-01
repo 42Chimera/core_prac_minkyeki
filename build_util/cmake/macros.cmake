@@ -1,24 +1,15 @@
-#
+# --------------------------------------------------------------------
 # Created by Minkyeu Kim on 12/13/23.
-#
+#   - Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
+#   - Reference : Blender cmake macro functions
+#     - https://github.com/blender/blender/blob/9c0bffcc89f174f160805de042b00ae7c201c40b/build_files/cmake/macros.cmake#L415
 
-# Reference : Blender cmake macro functions
+
 # --------------------------------------------------------------------
-# https://github.com/blender/blender/blob/9c0bffcc89f174f160805de042b00ae7c201c40b/build_files/cmake/macros.cmake#L415
-# Cmake 안에서 사용할 헬퍼 함수들을 여기서 정의합니다.
-
-
-
-# Cmake Colorized message function
-# --------------------------------------------------------------------
-# https://stackoverflow.com/questions/18968979/how-to-make-colorized-message-with-cmake
-
-# Add Library Macro : cm_printf(...)
-
-# How to Use
-# cm_printf(FATAL "foo") --> 에러 메시지, 빨간색
-# cm_printf(WARN "bar") --> 경고성 메시지, 마젠타
-# cm_printf(NOTE "baz") --> 단순 로그 메시지, 초록색
+# Colorized message function
+#   - cm_printf(FATAL "foo")  --> 에러 메시지, 빨간색
+#   - cm_printf(WARN "bar")   --> 경고성 메시지, 마젠타
+#   - cm_printf(STATUS "baz")   --> 단순 로그 메시지, 초록색
 
 if(NOT WIN32)
   string(ASCII 27 Esc)
@@ -56,8 +47,77 @@ function(cm_printf)
   endif()
 endfunction()
 
+
 # --------------------------------------------------------------------
+# 
 function(cm_printf_cmake_list_location)
   cm_printf(STATUS "Loading cmake lists... : ${CMAKE_CURRENT_LIST_DIR}")
 endfunction()
 
+
+# --------------------------------------------------------------------
+# 
+function(list_assert_duplicates
+  list_id
+  )
+
+  # message(STATUS "list data: ${list_id}")
+
+  list(REMOVE_ITEM list_id "PUBLIC" "PRIVATE" "INTERFACE")
+  list(LENGTH list_id _len_before)
+  list(REMOVE_DUPLICATES list_id)
+  list(LENGTH list_id _len_after)
+  # message(STATUS "list size ${_len_before} -> ${_len_after}")
+  if(NOT _len_before EQUAL _len_after)
+    cm_printf(FATAL "duplicate found in list which should not contain duplicates: ${list_id}")
+  endif()
+  unset(_len_before)
+  unset(_len_after)
+endfunction()
+
+
+# --------------------------------------------------------------------
+# 
+function(cm_add_library
+  name
+  sources
+  includes
+  includes_sys
+  library_deps
+  )
+
+  cm_add_library__impl(${name} "${sources}" "${includes}" "${includes_sys}" "${library_deps}")
+endfunction()
+
+function(cm_add_library__impl
+  name
+  sources
+  includes
+  includes_sys
+  library_deps
+  )
+
+  # message(STATUS "Configuring library ${name}")
+  # SHARED, STATIC, MODULE 명시는 하지 않았으나,
+  # SHARED로 처리할 수 있는 방법을 찾아서 적용할 예정
+  add_library(${name} ${sources})
+
+  # 엥 PUBLIC으로 안하면 test_test.cpp 에서 include_directories가 적용이 안되네.
+
+  # add include path to project
+  target_include_directories(${name} PUBLIC ${include}) 
+  # add library source
+  target_sources(${name} PUBLIC ${sources})
+  # remove default library output file's prefix ( default prefix = "lib" )
+  set_target_properties(${name} PROPERTIES PREFIX "")
+
+  # link dependecy libraries
+  if(library_deps)
+   target_link_libraries(${name} ${library_deps})
+  endif()
+
+  # assert duplicates in function arguments
+  list_assert_duplicates("${sources}")
+  list_assert_duplicates("${includes}")
+
+endfunction()
