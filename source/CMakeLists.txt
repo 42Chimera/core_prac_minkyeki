@@ -4,14 +4,15 @@ cm_printf_cmake_list_location()
 # 아래는 작동하지 않는다. 왜일까...
 # find_library(
 #   TEST
-#   NAMES cm::intern::libcm
-#   HINTS ${CMAKE_SOURCE_DIR}/intern
+#   NAMES cm_intern_libcm
+#   HINTS ${CMAKE_BINARY_DIR}/lib
 #   REQUIRED)
-# cm_printf(STATUS "${TEST}")
+# cm_printf(FATAL "TEST : ${TEST}")
 
 # Directories for header include
 set(INC
   ${CMAKE_SOURCE_DIR}/intern/libcm
+  # ${CMAKE_BINARY_DIR}/intern/libcm
 )
 
 
@@ -21,7 +22,7 @@ set(INC_SYS
 
 # Libraries to link
 set(LIB
-  cm::intern::libcm
+  cm_intern_libcm
 )
 
 # Source to compile
