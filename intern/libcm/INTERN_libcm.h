@@ -9,7 +9,7 @@
 
 // LIB WITH SOURCE
 // -------------------------
-namespace CM
+namespace Cm
 {
 
 _Check_return_void_ void test_speak() noexcept;

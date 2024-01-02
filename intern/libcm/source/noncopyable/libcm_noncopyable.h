@@ -10,7 +10,7 @@
 // Ref 1 : https://google.github.io/styleguide/cppguide.html#Copyable_Movable_Types
 // Ref 2 : https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Non-copyable_Mixin
 
-namespace CM
+namespace Cm
 {
 
 // NOTE: A copyable class should explicitly declare the copy operations

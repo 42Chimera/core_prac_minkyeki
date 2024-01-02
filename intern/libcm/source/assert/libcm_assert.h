@@ -42,7 +42,7 @@
 #define _CM_ASCII_CYAN    "\x1b[36m"
 #define _CM_ASCII_RESET   "\x1b[0m"
 
-#define CM_ASSERT_COMPILE(developer, expr, formatString)  static_assert(expr, _CM_ASCII_RED developer ": " formatString _CM_ASCII_RESET)
+#define CM_ASSERT_COMPILE(developer, expr, formatString)  static_assert(expr, developer ": " formatString)
 
 /* TODO: doAbort로 가르지 말고, Assert UI창을 따로 띄우고 [계속(continue)] [중지(pause)] [종료(abort)] 3가지 버튼 제공 + CallStack도 같이 보여주면 좋을 듯?   */
 #define __CM_ASSERT_IMPLEMENT(developer, expr, formatString, doAbort)                                                                                                                                                                    \

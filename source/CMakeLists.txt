@@ -11,7 +11,7 @@ cm_printf_cmake_list_location()
 
 # Source to compile
 set(SRC
-  main.cpp
+        Main/main.cpp
 )
 
 
