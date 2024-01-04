@@ -1,48 +1,64 @@
+cm_printf(STATUS " Current CmakeLists.txt location : ${CMAKE_CURRENT_LIST_DIR} ")
 
 # -----------------------------------------------------
 # (1) Detect OS 
 if(MSVC OR MSYS OR MINGW)
     # for Windows
-    set(SKIA_OS_WINDOWS)
+    set(SKIA_OS "windows")
 elseif(APPLE)
-    # for MacOS X or iOS, watchOS, tvOS (since 3.10.3)
-    set(SKIA_OS_APPLE)
+    # for MacOS X or iOS
+    set(SKIA_OS "macos")
 elseif(UNIX AND NOT APPLE)
     # for Linux, BSD, Solaris, Minix
-    set(SKIA_OS_LINUX)
+    set(SKIA_OS "linux")
 else()
     cm_printf(FATAL "Which OS are you using? this is fatal error.")
 endif()
 
 # (2) Detect Architecture
 if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64 bit
-    set(SKIA_ARC_64)
+    if(SKIA_OS STREQUAL "macos" AND CMAKE_APPLE_SILICON_PROCESSOR STREQUAL "arm64")
+        set(SKIA_CPU arm64)
+    else()
+        set(SKIA_CPU x64)
+    endif()
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32 bit
-    set(SKIA_ARC_32)
+    set(SKIA_CPU x86)
 else()
     cm_printf(FATAL "Which Architecture are you using? this is fatal error.")
 endif()
 
-# (+) 
-if(DEFINED SKIA_OS_APPLE AND CMAKE_APPLE_SILICON_PROCESSOR STREQUAL "arm64")
-    set(SKIA_OS_APPLE_ARM)
-endif()
 
-# (3) Set Prebuilt version
-if(DEFINED SKIA_OS_WINDOWS AND DEFINED SKIA_ARC_64)
-    set(SKIA_FILE windows-Debug-x64.zip)
-elseif(DEFINED SKIA_OS_LINUX AND DEFINED SKIA_ARC_64)
-    set(SKIA_FILE linux-Debug-x64.zip)
-elseif(DEFINED SKIA_OS_APPLE AND DEFINED SKIA_ARC_64)
-    if(DEFINED SKIA_OS_APPLE_ARM)
-        set(SKIA_FILE macos-Debug-arm64.zip)
-    elseif()
-        set(SKIA_FILE macos-Debug-x64.zip)
+# ----------------------------------------------------------------------
+# Download Skia prebuilt library
+#     - https://github.com/HumbleUI/SkiaBuild/releases
+set(SKIA_BUILD_TYPE              ${CMAKE_BUILD_TYPE}) 
+set(SKIA_PREBUILT_TAG            m116-d2c211228d)
+set(SKIA_FILE                    "${SKIA_OS}-${SKIA_BUILD_TYPE}-${SKIA_CPU}.zip")
+set(SKIA_PREBUILT_ZIP_PATH       "${CMAKE_CURRENT_LIST_DIR}/${SKIA_FILE}")
+set(SKIA_PREBUILT_REPO_URL       https://github.com/HumbleUI/SkiaBuild/releases/download/${SKIA_PREBUILT_TAG}/Skia-${SKIA_PREBUILT_TAG}-${SKIA_FILE})
+ 
+
+if(NOT EXISTS ${SKIA_PREBUILT_ZIP_PATH})
+    file(DOWNLOAD ${SKIA_PREBUILT_REPO_URL} ${SKIA_PREBUILT_ZIP_PATH} STATUS SKIA_DOWNLOAD_STATUS)
+    list(GET SKIA_DOWNLOAD_STATUS 0 SKIA_DOWNLOAD_STATUS_NO)
+
+    if(SKIA_DOWNLOAD_STATUS_NO)
+        cm_printf(STATUS " == Pre-built library not downloaded. Building from source. (${SKIA_DOWNLOAD_STATUS})")
+        file(REMOVE ${SKIA_PREBUILT_ZIP_PATH})
+    else()
+        cm_printf(STATUS " == Pre-built library download complete.")
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar -xvf ${SKIA_PREBUILT_ZIP_PATH} 
+          WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        )
+        # file(REMOVE ${SKIA_PREBUILT_ZIP_PATH})
     endif()
-else()
-    cm_printf(FATAL "x32 currently not supported")
 endif()
 
+file(GLOB_RECURSE SKIA_LIB_FILES CONFIGURE_DEPENDS "*.a"
+)
+# cm_printf(STATUS "${SKIA_LIB_FILES}")
 
 
 
@@ -50,32 +66,24 @@ endif()
 
 
 
-# https://github.com/HumbleUI/SkiaBuild/releases
-set(SKIA_PREBUILT_PATH           ${CMAKE_CURRENT_LIST_DIR}/bin)
-set(SKIA_PREBUILT_REPO_URL       https://github.com/HumbleUI/SkiaBuild/releases/download/m116-d2c211228d-${SKIA_FILE})
+# set(SRC)
+# # 라이브러리 빌드에 필요한 소스 (.a)
+# file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
+#     "*.a"
+# )
 
+# # 라이브러리 빌드 Flag에 기입할 include path : #include " 경로/* "
+# set(INC
+#     ${CMAKE_CURRENT_LIST_DIR}/include
+# )
 
-# -----------------------------------------------------
-# (2) Download Skia prebuilt library
-set(SKIA_PATH ${CMAKE_CURRENT_LIST_DIR}/bin)
+# # 라이브러리 빌드 Flag에 기입할 include path : #include < 경로/* >
+# set(INC_SYS
+# )
 
-file(DOWNLOAD ${LIBHELLO_URL} ${LIBHELLO_PATH} STATUS LIBHELLO_DOWNLOAD_STATUS)
-list(GET LIBHELLO_DOWNLOAD_STATUS 0 LIBHELLO_DOWNLOAD_STATUS_NO)
+# # 라이브러리 빌드에 필요한 타 라이브러리
+# set(LIB
+# )
 
-if(LIBHELLO_DOWNLOAD_STATUS_NO)
-    message(STATUS "Pre-built library not downloaded. Building from source. (${LIBHELLO_DOWNLOAD_STATUS})")
-    file(REMOVE ${LIBHELLO_PATH})
-else()
-    message(STATUS "Linking downloaded pre-built library.")
-endif()
-
-if(EXISTS ${LIBHELLO_PATH})
-    add_library(hello STATIC IMPORTED)
-    set_target_properties(hello PROPERTIES
-            IMPORTED_LOCATION ${LIBHELLO_PATH}
-            INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/include/libhello
-            )
-else()
-    add_library(hello src/libhello/hello.cpp)
-    target_include_directories(hello PUBLIC include/libhello)
-endif()
+# # 모든 설정들 모아서 라이브러리 생성.
+# cm_add_library(cm_extern_skia "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
