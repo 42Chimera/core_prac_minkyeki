@@ -26,4 +26,4 @@ print_dependency_header () {
 # build GLFW      # https://github.com/glfw/glfw
 print_dependency_header glfw
 git clone https://github.com/42Chimera/glfw.git source
-cmake -S ./GLFW -B ./GLFW/build && make -C ./GLFW/build
+cmake -S ./GLFW -B ./GLFW/build && make -C ./GLFW/build -j4

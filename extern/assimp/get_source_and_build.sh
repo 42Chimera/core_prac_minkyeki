@@ -23,9 +23,7 @@ print_dependency_header () {
 }
 
 # -----------------------------------------------------
-# build GLEW      # https://github.com/nigels-com/glew
-print_dependency_header glew
-git clone https://github.com/42Chimera/glew.git source
-cd ./GLEW/build
-cmake ./cmake && make glew_s -j4 # build the glew static library
-cd ../../
+# build assimp    # https://github.com/assimp/assimp
+print_dependency_header assimp
+git clone -b v5.2.5 https://github.com/assimp/assimp.git source
+cmake -S ./source -B ./source/build && make -C ./source/build -j4
