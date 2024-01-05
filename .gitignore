@@ -2,3 +2,5 @@ build
 .cache
 .idea
 .vscode
+
+extern/skia/source/deps

@@ -2,7 +2,6 @@ Skia : Chimera's GUI rendering engine
 ---
 Cmake Configure 될때 빌드파일을 자동으로 다운로드 받습니다.
 #### 직접 빌드하는건 너무 오래 걸려서...
-
 ### use prebuilt binaries. (static lib)
 - https://github.com/JetBrains/skia-build/releases
 - https://github.com/HumbleUI/SkiaBuild/releases
@@ -17,5 +16,5 @@ target_link_libraries(${TARGET} PRIVATE
   # ...
 )
 ```
-
-
+---
+아니면, 직접 빌드 파일 다운받아서 빌드하는 경우... (개오래 걸림)

@@ -1,5 +1,4 @@
 # -----------------------------------------------------------------------------
-# Early Initialization
 cmake_minimum_required(VERSION 3.24)
 
 # -----------------------------------------------------------------------------
@@ -7,8 +6,7 @@ cmake_minimum_required(VERSION 3.24)
 include(build_util/cmake/macros.cmake)
 
 # -----------------------------------------------------------------------------
-# Avoid having an empty `CMAKE_BUILD_TYPE`.
-# 빌드 타입 명시가 없으면 기본 debug로 설정.
+# Avoid having an empty `CMAKE_BUILD_TYPE` : 빌드 타입 명시가 없으면 기본 debug로 설정.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   cm_printf(WARN "===== CMAKE_BUILD_TYPE : Unspecified =====")
   cm_printf(WARN "Setting CMAKE_BUILD_TYPE to Debug by default...")
@@ -22,12 +20,9 @@ endif()
 # Disbale CMAKE DEPRECATION WARNING
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE) 
 
-# Generate a compile_commands.json in your build directory 
-# that lists every file and it's compile command.
+# Generate a compile_commands.json in your build directory that lists every file and it's compile command.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 cm_printf(STATUS "List of every file and it's compile command is saved to 'build/compile_commands.json'")
-
-
 
 # -----------------------------------------------------------------------------
 # Initialize Project
@@ -35,7 +30,6 @@ set( NAME chimera )                         # Executable name
 set( CMAKE_CXX_STANDARD 20 )                # Cpp compiler version
 set( CMAKE_CXX_STANDARD_REQUIRED True )
 project( ${NAME} VERSION 0.1.0 LANGUAGES C CXX )
-
 
 # -----------------------------------------------------------------------------
 # Compiler warning level setting
@@ -52,29 +46,25 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) # Update if necessa
 endif()
 
 # -------------------------------------------------------------------------------
-# Add Global Defines to project
-# if CMAKE_BUILD_TYPE is Debug, define CM_DEBUG. else, define CM_RELEASE 
+# Add Global Defines to project. : If CMAKE_BUILD_TYPE is Debug, define CM_DEBUG. else, define CM_RELEASE 
 add_compile_definitions(
   CM_PROJECT_ABSOLUTE_PATH="${CMAKE_SOURCE_DIR}" # Project absolute path
   $<IF:$<CONFIG:Debug>,CM_DEBUG,CM_RELEASE> # Set build-type define variable
+  GLM_FORCE_SWIZZLE # force GLM to report the configuration as part of the build log
 )
 
 # -----------------------------------------------------------------------------
 # Add Sub-Directories
-
-# Print current cmake list location (for debug purpose)
 cm_printf_cmake_list_location()
 add_subdirectory(intern)
-# add_subdirectory(extern) # --> extern은 좀 다르게 처리해야 함!
+add_subdirectory(extern)
 add_subdirectory(source)
 
 # ----------------------------------------------------------------------------
-# Set CMAKE output directory
+# Set CMAKE output directory : 최종 실행파일을 밖으로 빼기 위한 용도
 cm_printf(STATUS "Executable output path : ${CMAKE_BINARY_DIR}")
 set_target_properties( ${NAME} 
   PROPERTIES
-  # ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-  # LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
