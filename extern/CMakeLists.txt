@@ -8,13 +8,10 @@ cm_printf(STATUS " Current CmakeLists.txt location : ${CMAKE_CURRENT_LIST_DIR} "
 # (3) 라이브러리 바이너리 링크 설정
 # -------------------------------------------------------------------------------
 
-# add_subdirectory(glew)
-# add_subdirectory(glfw)
-
+add_subdirectory(glew)
+add_subdirectory(glfw)
 add_subdirectory(imgui)
-
 add_subdirectory(spdlog)
-
 add_subdirectory(glm)
 
 # add_subdirectory(skia)
